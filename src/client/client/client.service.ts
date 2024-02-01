@@ -7,7 +7,6 @@ import { ClientDto } from '../client-dto/client-dto';
 import { UpdateClientDto } from '../client-dto/update-client-dto';
 import * as bcrypt from 'bcrypt';
 import { ChangePasswordDto } from 'src/change-password-dto';
-import { Role } from 'src/role';
 
 @Injectable()
 export class ClientService {
@@ -23,7 +22,6 @@ export class ClientService {
       );
     }
     clientDto.motDePasse = await this.encodePassword(clientDto.motDePasse);
-    clientDto.role = Role.CLIENT;
     const client = this.clientRepository.create(clientDto);
     return await this.clientRepository.save(client);
   }

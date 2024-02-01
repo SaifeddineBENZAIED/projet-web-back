@@ -37,7 +37,7 @@ import { JwtService } from '@nestjs/jwt';
       port: 3307,
       username: 'root',
       password: '',
-      database: 'librairie_bd_projet_web',
+      database: 'bd_projet_web_librairie',
       autoLoadEntities: true,
       synchronize: true,
       logging: true,

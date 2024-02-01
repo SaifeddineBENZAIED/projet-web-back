@@ -47,7 +47,7 @@ export class AuthenticationController {
   }
   
   @Post('/login-client')
-  async loginClient(@Body(new ValidationPipe()) clientLoginDto: LoginDto) {
+  async loginClient(@Body() clientLoginDto: LoginDto) {
     return this.authService.authenticateClient(clientLoginDto);
   }
   

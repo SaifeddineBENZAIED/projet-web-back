@@ -7,22 +7,22 @@ import { Column, Entity, OneToMany } from "typeorm";
 
 @Entity('client')
 export class ClientEntity extends AbstractEntity{
-    @Column({ length: 50 })
+    @Column()
     nom: string;
 
-    @Column({ length: 50 })
+    @Column()
     prenom: string;
 
-    @Column({ length: 100 })
+    @Column()
     adresse: string;
 
-    @Column({ length: 100, unique: true })
+    @Column({ unique: true })
     email: string;
 
     @Column({ length: 15 })
     numTelephone: string;
 
-    @Column({ length: 30 })
+    @Column()
     motDePasse: string;
 
     @Column({ nullable: true })

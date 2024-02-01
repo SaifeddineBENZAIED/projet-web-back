@@ -357,10 +357,7 @@ export class CommandeClientService {
     commande.etatCommande = commandeClientDto.etatCommande || commande.etatCommande;
     commande.dateCommande = commandeClientDto.dateCommande || commande.dateCommande;
   
-    const lignesCmd = await this.ligneCommandeClientRepository.find({
-      where: { commandeClient: { id: commandeClientDto.id } },
-      relations: ['commandeClient', 'article'],
-    });
+    const lignesCmd = commandeClientDto.ligneCommandeClients;
     for (const ligneDto of lignesCmd) {
       let ligne = commande.ligneCommandeClients.find(l => l.id === ligneDto.id);
       if (ligne) {
@@ -375,12 +372,12 @@ export class CommandeClientService {
   
     // Supprimer les lignes de commande qui ne sont plus présentes dans commandeClientDto
     const idsDto = lignesCmd.map(l => l.id);
-    commande.ligneCommandeClients.forEach(async ligne => {
+    for (const ligne of commande.ligneCommandeClients) {
       if (!idsDto.includes(ligne.id)) {
         await this.ajusterStockArticle(ligne.article.id, ligne.quantite, TypedeMvmntStock.CORRECTION_POS);
         await this.ligneCommandeClientRepository.remove(ligne);
       }
-    });
+    }
 
     const updatedCommande = Object.assign(oldCmd, commande);
   

@@ -1,7 +1,6 @@
 /* eslint-disable prettier/prettier */
 
-import { IsEmail, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsPhoneNumber, IsString, IsStrongPassword, Length } from "class-validator";
-import { Role } from "src/role";
+import { IsEmail, IsNotEmpty, IsNumber, IsOptional, IsPhoneNumber, IsString, IsStrongPassword, Length } from "class-validator";
 import { TokenEntity } from "src/token/token-entity/token-entity";
 
 export class ClientDto{
@@ -27,16 +26,11 @@ export class ClientDto{
 
     @IsNotEmpty()
     @IsEmail()
-    @Length(1, 100)
     email: string;
 
     @IsNotEmpty()
     @IsPhoneNumber('TN')
     numTelephone: string;
-
-    @IsOptional()
-    @IsEnum(Role)
-    role: Role;
 
     @IsNotEmpty()
     @IsStrongPassword()
