@@ -12,8 +12,8 @@ export class MailService {
         port: 587,
         secure: false,
         auth: {
-            user: 'gestiondestock123@gmail.com',
-            pass: 'izad gapp lkca fxsy',
+            user: '',
+            pass: '',
         },
     });
   }
