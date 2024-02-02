@@ -6,6 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ArticleModule } from 'src/article/article.module';
 import { UserModule } from 'src/user/user.module';
 import { ClientModule } from 'src/client/client.module';
+import { MailService } from 'src/mailing/mail/mail.service';
 
 @Module({
   imports: [
@@ -14,7 +15,7 @@ import { ClientModule } from 'src/client/client.module';
     UserModule,
     ClientModule,
   ],
-  providers: [StockService],
+  providers: [StockService, MailService],
   controllers: [StockController],
   exports: [StockService],
 })

@@ -424,6 +424,11 @@ export class CommandeFournisseurService {
         mvmntStock.typeMvmntStck = typeMouvement;
         mvmntStock.sourceMvmntStck = SourceMvmntStock.COMMANDE_FOURNISSEUR;
       
-        await this.stockService.save(mvmntStock);
+        if(typeMouvement === TypedeMvmntStock.CORRECTION_POS){
+          await this.stockService.correctionStockPos(mvmntStock);
+        }else if(typeMouvement === TypedeMvmntStock.CORRECTION_NEG){
+          await this.stockService.correctionStockNeg(mvmntStock);
+        }
+        
       }
 }

@@ -13,6 +13,7 @@ import { TypedeMvmntStock } from 'src/type-mvmnt-stock';
 import { SourceMvmntStock } from 'src/source-mvmnt-stock';
 import { ArticleService } from 'src/article/article/article.service';
 import { StockEntity } from 'src/stock/stock-entity/stock-entity';
+import { MailService } from 'src/mailing/mail/mail.service';
 
 @Injectable()
 export class CommandeClientService {
@@ -24,6 +25,7 @@ export class CommandeClientService {
     private readonly articleService: ArticleService,
     private readonly stockService: StockService,
     private readonly clientService: ClientService,
+    private readonly mailService: MailService,
   ) {}
 
   async save(commandeClientDto: CommandeClientDto): Promise<CommandeClientEntity> {
@@ -68,7 +70,19 @@ export class CommandeClientService {
       await this.updateMvmntStck(idCommande);
     }
 
+    if(commandeClient.etatCommande === EtatCommande.VALIDEE) {
+      await this.notifyClientForCommandeValidation(commandeClient.client.email, commandeClient);
+    }
+
     return commandeClient;
+  }
+
+  async notifyClientForCommandeValidation(email: string, cmd: CommandeClientEntity) {
+
+    const htmlContent = `<p>Votre commande avec le code : ${cmd.codeCC}, passée à cette date : ${cmd.dateCommande}, est maintenant validée. Elle est donc prête pour être livrée, ou bien, si vous préférez, vous pouvez venir la récupérer à tout moment.</p>`;
+      
+    await this.mailService.sendMail(email, 'Commande validée', htmlContent);
+    
   }
 
   async updateQuantiteCommande(
@@ -353,6 +367,10 @@ export class CommandeClientService {
     if (!commande) {
       throw new NotFoundException(`CommandeClient with ID ${commandeClientDto.id} not found`);
     }
+
+    if (commande.etatCommande === EtatCommande.LIVREE) {
+      throw new BadRequestException("Cette commande est déjà livrée");
+    }
   
     commande.etatCommande = commandeClientDto.etatCommande || commande.etatCommande;
     commande.dateCommande = commandeClientDto.dateCommande || commande.dateCommande;
@@ -380,6 +398,10 @@ export class CommandeClientService {
     }
 
     const updatedCommande = Object.assign(oldCmd, commande);
+
+    if(updatedCommande.etatCommande === EtatCommande.VALIDEE){
+      this.notifyClientForCommandeValidation(updatedCommande.client.email, updatedCommande);
+    }
   
     return await this.commandeClientRepository.save(updatedCommande);
   }
@@ -425,8 +447,13 @@ export class CommandeClientService {
     mvmntStock.quantite = Math.abs(quantite);
     mvmntStock.typeMvmntStck = typeMouvement;
     mvmntStock.sourceMvmntStck = SourceMvmntStock.COMMANDE_CLIENT;
-  
-    await this.stockService.save(mvmntStock);
+
+    if(typeMouvement === TypedeMvmntStock.CORRECTION_POS){
+      await this.stockService.correctionStockPos(mvmntStock);
+    }else if(typeMouvement === TypedeMvmntStock.CORRECTION_NEG){
+      await this.stockService.correctionStockNeg(mvmntStock);
+    }
+    
   }
   
 }

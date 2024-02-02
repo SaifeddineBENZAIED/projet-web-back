@@ -7,6 +7,9 @@ import { Repository } from 'typeorm';
 import { TypedeMvmntStock } from 'src/type-mvmnt-stock';
 import { ArticleService } from 'src/article/article/article.service';
 import { SourceMvmntStock } from 'src/source-mvmnt-stock';
+import { UserService } from 'src/user/user/user.service';
+import { MailService } from 'src/mailing/mail/mail.service';
+import { ArticleEntity } from 'src/article/article-entity/article-entity';
 
 @Injectable()
 export class StockService {
@@ -14,11 +17,14 @@ export class StockService {
     @InjectRepository(StockEntity)
     private readonly stockRepository: Repository<StockEntity>,
     private readonly articleService: ArticleService,
+    private readonly userService: UserService,
+    private readonly mailService: MailService,
   ) {}
 
   async save(stockDto: StockDto): Promise<StockEntity> {
     const stock = this.stockRepository.create(stockDto);
     const savedStock = await this.stockRepository.save(stock);
+    this.checkAndNotify(savedStock.article);
     return savedStock;
   }
 
@@ -26,6 +32,8 @@ export class StockService {
     stockDto.quantite = Math.abs(stockDto.quantite);
     stockDto.typeMvmntStck = TypedeMvmntStock.CORRECTION_NEG;
     stockDto.sourceMvmntStck = SourceMvmntStock.CORRECTION;
+
+    this.checkAndNotify(stockDto.article);
 
     return await this.save(stockDto);
   }
@@ -35,6 +43,8 @@ export class StockService {
     stockDto.typeMvmntStck = TypedeMvmntStock.CORRECTION_POS;
     stockDto.sourceMvmntStck = SourceMvmntStock.CORRECTION;
 
+    this.checkAndNotify(stockDto.article);
+
     return await this.save(stockDto);
   }
 
@@ -42,12 +52,16 @@ export class StockService {
     stockDto.quantite = -Math.abs(stockDto.quantite);
     stockDto.typeMvmntStck = TypedeMvmntStock.SORTIE;
 
+    this.checkAndNotify(stockDto.article);
+
     return await this.save(stockDto);
   }
 
   async entreeStock(stockDto: StockDto): Promise<StockEntity> {
     stockDto.quantite = Math.abs(stockDto.quantite);
     stockDto.typeMvmntStck = TypedeMvmntStock.ENTREE;
+
+    this.checkAndNotify(stockDto.article);
 
     return await this.save(stockDto);
   }
@@ -89,5 +103,18 @@ export class StockService {
     const realStock = parseFloat(result.realStock);
 
     return realStock;
+  }
+
+  async checkAndNotify(article: ArticleEntity) {
+    const stckR = await this.stockReelArticle(article.id);
+    if(stckR < 5){
+      const listUser = await this.userService.findAll();
+
+      const htmlContent = `<p>Le stock de l'article ${article.nomArticle} est faible.</p>`;
+      
+      for (const user of listUser) {
+        await this.mailService.sendMail(user.email, 'Stock faible', htmlContent);
+      }
+    }
   }
 }

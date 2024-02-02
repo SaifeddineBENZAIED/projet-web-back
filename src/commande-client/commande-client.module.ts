@@ -7,6 +7,7 @@ import { LigneCommandeClientEntity } from 'src/ligne-commande-client/ligne-comma
 import { ArticleModule } from 'src/article/article.module';
 import { StockModule } from 'src/stock/stock.module';
 import { ClientModule } from 'src/client/client.module';
+import { MailService } from 'src/mailing/mail/mail.service';
 
 @Module({
   imports: [
@@ -15,7 +16,7 @@ import { ClientModule } from 'src/client/client.module';
     StockModule,
     ClientModule,
   ],
-  providers: [CommandeClientService],
+  providers: [CommandeClientService, MailService],
   controllers: [CommandeClientController],
 })
 export class CommandeClientModule {}

@@ -22,6 +22,7 @@ import { ImageController } from './image/image.controller';
 import { MulterModule } from '@nestjs/platform-express';
 import { StrategyImageContextService } from './strategy/strategy-image-context/strategy-image-context.service';
 import { JwtService } from '@nestjs/jwt';
+import { MailService } from './mailing/mail/mail.service';
 
 @Module({
   imports: [
@@ -62,6 +63,7 @@ import { JwtService } from '@nestjs/jwt';
     JwtService,
     FlickrService,
     StrategyImageContextService,
+    MailService,
   ],
 })
 export class AppModule implements NestModule {
